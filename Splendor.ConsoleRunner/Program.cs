@@ -9,16 +9,18 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Run1000();
+            Run1();
         }
 
         static void Run1()
         {
-            var aiPlayers = new[]
+            var aiPlayers = new ISpendorAi[]
             {
                 new StupidSplendorAi("Robin"),
                 new StupidSplendorAi("James"),
-                new StupidSplendorAi("Mat"),
+
+                new PredictiveAi(() => new StupidSplendorAi($"{Guid.NewGuid()}"))
+                    { Name = "Mat" }
             };
 
             var runner = new AiGameRunner(aiPlayers, Console.WriteLine);

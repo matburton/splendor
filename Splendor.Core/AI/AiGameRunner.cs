@@ -13,10 +13,14 @@ namespace Splendor.Core.AI
 
         private readonly Action<string> m_Log;
 
-        public AiGameRunner(IEnumerable<ISpendorAi> players, Action<string> log)
+        public AiGameRunner(IEnumerable<ISpendorAi> players,
+                            Action<string> log,
+                            IGameInitialiser gameInitialiser = null)
         {
+            gameInitialiser ??= new DefaultGameInitialiser(new DefaultCards());
+
             var ais = players.ToArray();
-            var state = new DefaultGameInitialiser(new DefaultCards()).Create(players: ais.Length);
+            var state = gameInitialiser.Create(players: ais.Length);
             _playerMap = new Dictionary<Player, ISpendorAi>();
             for(int i = 0; i < state.Players.Length; i++)
             {
