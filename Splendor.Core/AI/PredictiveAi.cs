@@ -1,13 +1,9 @@
 ﻿
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 using Splendor.Core.Actions;
-
-using static System.Environment;
 
 namespace Splendor.Core.AI
 {
@@ -32,75 +28,11 @@ namespace Splendor.Core.AI
                 throw new ArgumentNullException(nameof(gameState));
             }
 
-            using var cancellationTokenSource = new CancellationTokenSource();
+            var action = PossibleActions(gameState)
+                        .First(a => IsWinningAction(a, gameState));
 
-            using var possibleActionBuffer = new BlockingCollection<IAction>
-                (ProcessorCount);
-
-            using var winningActions = new BlockingCollection<IAction>();
-
-            var cancellationToken = cancellationTokenSource.Token;
-
-            var threads = new List<Thread>();
-
-            void StartThread(Action threadStart)
-            {
-                var thread = new Thread(() =>
-                {
-                    try { threadStart(); }
-                    catch (OperationCanceledException) {} // Why .NET why!
-                });
-
-                thread.Start();
-
-                threads.Add(thread);
-            }
-
-            try
-            {
-                // ReSharper disable AccessToDisposedClosure
-                // ReSharper disable ImplicitlyCapturedClosure
-                StartThread(() =>
-                {
-                    foreach (var action in PossibleActions(gameState))
-                    {
-                        possibleActionBuffer.Add(action, cancellationToken);
-                    }
-                });
-
-                foreach (var _ in Enumerable.Range(0, 1))//ProcessorCount))
-                {
-                    StartThread(() =>
-                    {
-                        while (true)
-                        {
-                            var action = possibleActionBuffer.Take
-                                (cancellationToken);
-
-                            if (IsWinningAction(action, gameState))
-                            {
-                                winningActions.Add(action, cancellationToken);
-                            }
-                        }
-                    });
-                }
-                // ReSharper restore ImplicitlyCapturedClosure
-                // ReSharper restore AccessToDisposedClosure
-
-                var action = winningActions.TryTake(out var winningAction,
-                                                    TimeSpan.FromSeconds(10))
-                           ? winningAction
-                           : new NoAction();
-
-                return action is NoAction ? PossibleActions(gameState).First()
-                                          : action;
-            }
-            finally
-            {
-                cancellationTokenSource.Cancel();
-
-                threads.ForEach(t => t.Join());
-            }
+            return action is NoAction ? PossibleActions(gameState).First()
+                                      : action;
         }
 
         private static IEnumerable<IAction> PossibleActions(GameState gameState)
