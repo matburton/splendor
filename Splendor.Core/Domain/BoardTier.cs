@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Splendor
 {
@@ -15,6 +16,10 @@ namespace Splendor
                 if(FaceDownCards.Count > 0) ColumnSlots[i] = FaceDownCards.Dequeue();
             }
         }
+
+        public BoardTier Clone() => new BoardTier(Tier, FaceDownCards, 0)
+            { FaceDownCards = new Queue<Card>(FaceDownCards),
+              ColumnSlots   = ColumnSlots.ToDictionary(p => p.Key, p => p.Value) };
 
         public int Tier { get; private set; }
         public Queue<Card> FaceDownCards { get; private set; }

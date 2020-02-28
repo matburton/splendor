@@ -19,6 +19,12 @@ namespace Splendor
             CardsInPlay = new List<Card>();
         }
 
+        public Player Clone() => new Player(Name)
+            { Purse         = Purse.ToDictionary(p => p.Key, p => p.Value),
+              ReservedCards = ReservedCards.ToList(),
+              CardsInPlay   = CardsInPlay.ToList(),
+              Nobles        = Nobles.ToList() };
+
         public IDictionary<TokenColour, int> Purse { get; private set; }
         public IList<Card> ReservedCards { get; private set; }
         public IList<Card> CardsInPlay { get; private set; }
