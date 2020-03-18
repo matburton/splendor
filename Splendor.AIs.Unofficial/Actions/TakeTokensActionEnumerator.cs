@@ -7,6 +7,7 @@ using Splendor.Core;
 using Splendor.Core.Actions;
 
 using static System.Linq.Enumerable;
+using static System.Math;
 
 namespace Splendor.AIs.Unofficial.Actions
 {
@@ -69,12 +70,11 @@ namespace Splendor.AIs.Unofficial.Actions
             return totalTokens
                   .Colours()
                   .OrderBy(c => c)
-                  .SelectMany(c => Repeat(c, Math.Min(totalTokens[c], returnCount)))
+                  .SelectMany(c => Repeat(c, Min(totalTokens[c], returnCount)))
                   .ToArray()
                   .ItemPermutations(returnCount)
                   .Distinct(new ColoursEqualityComparer())
-                  .Select(l => l.ToPool())
-                  .Select(Take);
+                  .Select(l => Take(l.ToPool()));
         }
     }
 }

@@ -18,15 +18,12 @@ namespace Splendor.AIs.Unofficial.Actions
                 throw new ArgumentNullException(nameof(gameState));
             }
 
-            if (gameState.CurrentPlayer.ReservedCards.Count >= 3)
-            {
-                yield break;
-            }
+            if (gameState.CurrentPlayer.ReservedCards.Count >= 3) yield break;
 
             var tokenColours = gameState.CurrentPlayer.Purse.Sum <= 9 ? null
-                             : gameState.CurrentPlayer.Purse.Colours()
-                                        .Union(new [] { TokenColour.Gold })
-                                        .ToArray();
+                             : gameState.CurrentPlayer.Purse.Colours().ToList();
+
+            if (gameState.Bank.Gold > 0) tokenColours?.Add(TokenColour.Gold);
 
             var tiers = gameState.Tiers.Where(t => t.HasFaceDownCardsRemaining);
 
@@ -56,10 +53,7 @@ namespace Splendor.AIs.Unofficial.Actions
                 yield break;
             }
 
-            foreach (var colour in colours)
-            {
-                yield return toAction(colour);
-            }
+            foreach (var colour in colours) yield return toAction(colour);
         }
     }
 }

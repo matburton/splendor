@@ -7,6 +7,7 @@ using Splendor.Core;
 using Splendor.Core.Actions;
 
 using static System.Linq.Enumerable;
+using static Splendor.Core.TokenColour;
 
 namespace Splendor.AIs.Unofficial.Actions
 {
@@ -51,7 +52,7 @@ namespace Splendor.AIs.Unofficial.Actions
             return PaymentPermutations(doHaveColours, extraGold)
                   .Select(c => { Array.Sort(c); return c; })
                   .Distinct(new ColoursEqualityComparer())
-                  .Select(c => c.Concat(Repeat(TokenColour.Gold, dontHave.Sum)))
+                  .Select(c => c.Concat(Repeat(Gold, dontHave.Sum)))
                   .Select(c => new BuyCard(card, c.ToPool()));
         }
 
@@ -60,16 +61,11 @@ namespace Splendor.AIs.Unofficial.Actions
         {
             for (var useGold = 0; useGold <= goldCount; ++useGold)
             {
-                var indexPermutations = costColours.IndexPermutations(useGold);
-
-                foreach (var indexes in indexPermutations)
+                foreach (var indexes in costColours.IndexPermutations(useGold))
                 {
                     var useColours = costColours.ToArray();
 
-                    foreach (var index in indexes)
-                    {
-                        useColours[index] = TokenColour.Gold;
-                    }
+                    foreach (var index in indexes) useColours[index] = Gold;
 
                     yield return useColours;
                 }

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Splendor.AIs.Unofficial.Actions;
@@ -16,11 +17,6 @@ namespace Splendor.AIs.Unofficial
     {
         public string Name { get; } = $"{Guid.NewGuid()}";
 
-        /// <remarks>Instances of Random must not be shared
-        ///          if there is any chance of concurrency</remarks>
-        ///
-        public Random Random { private get; set; } = new Random();
-
         public IAction ChooseAction(GameState gameState)
         {
             var actionVariations = m_ActionEnumerator
@@ -29,22 +25,26 @@ namespace Splendor.AIs.Unofficial
 
             while (actionVariations.Any())
             {
-                var index = Random.Next(actionVariations.Count);
+                var index = RandomIndex(actionVariations);
 
                 var actions = actionVariations[index].ToArray();
 
-                if (actions.Any())
-                {
-                    return actions[Random.Next(actions.Length)];
-                }
-                
+                if (actions.Any()) return actions[RandomIndex(actions)];
+
                 actionVariations.RemoveAt(index);
             }
 
             return new NoAction();
         }
 
-        private IActionEnumerator m_ActionEnumerator =
+        private int RandomIndex(IReadOnlyCollection<object> collection)
+        {
+            lock (m_Random) return m_Random.Next(collection.Count);
+        }
+
+        private readonly Random m_Random = new Random();
+
+        private readonly IActionEnumerator m_ActionEnumerator =
             new CompositeActionEnumerator(new TakeTokensActionEnumerator(),
                                           new BuyCardActionEnumerator(),
                                           new ReserveCardActionEnumerator());
