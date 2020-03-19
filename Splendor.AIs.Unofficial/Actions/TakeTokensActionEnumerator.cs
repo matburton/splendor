@@ -21,39 +21,31 @@ namespace Splendor.AIs.Unofficial.Actions
                 throw new ArgumentNullException(nameof(gameState));
             }
 
-            if (gameState.Bank.Sum <= 0) yield break;
+            if (gameState.Bank.Sum <= 0) return new IEnumerable<IAction>[] {};
 
-            var actionVariations = TakeTwoVariations(gameState)
-                                  .Concat(TakeThreeVariations(gameState));
-
-            foreach (var group in actionVariations) yield return group;
+            return TakeTwoVariations(gameState)
+                  .Concat(TakeThreeVariations(gameState));
         }
 
         private static IEnumerable<IEnumerable<TakeTokens>> TakeTwoVariations
             (GameState gameState)
         {
-            var colours = gameState.Bank.Colours(includeGold: false)
-                                        .Where(c => gameState.Bank[c] >= 4);
-
-            foreach (var colour in colours)
-            {
-                yield return WithReturnVariations(new Pool { [colour] = 2 },
-                                                  gameState);
-            }
+            return gameState.Bank
+                  .Colours(includeGold: false)
+                  .Where(c => gameState.Bank[c] >= 4)
+                  .Select(c => new Pool { [c] = 2 })
+                  .Select(p => WithReturnVariations(p, gameState));
         }
 
         private static IEnumerable<IEnumerable<TakeTokens>> TakeThreeVariations
             (GameState gameState)
         {
-            var toTakePermutations = gameState.Bank.Colours(includeGold: false)
-                                                   .ToArray()
-                                                   .ItemPermutations(3)
-                                                   .Select(l => l.ToPool());
-
-            foreach (var toTake in toTakePermutations)
-            {
-                yield return WithReturnVariations(toTake, gameState);
-            }
+            return gameState.Bank
+                  .Colours(includeGold: false)
+                  .ToArray()
+                  .ItemPermutations(3)
+                  .Select(l => l.ToPool())
+                  .Select(p => WithReturnVariations(p, gameState));
         }
 
         private static IEnumerable<TakeTokens> WithReturnVariations

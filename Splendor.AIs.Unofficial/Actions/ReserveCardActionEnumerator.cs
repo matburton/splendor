@@ -46,14 +46,8 @@ namespace Splendor.AIs.Unofficial.Actions
             (IEnumerable<TokenColour> colours,
              Func<TokenColour?, IAction> toAction)
         {
-            if (colours is null)
-            {
-                yield return toAction(null);
-
-                yield break;
-            }
-
-            foreach (var colour in colours) yield return toAction(colour);
+            return colours is null ? new [] { toAction(null) }
+                                   : colours.Select(c => toAction(c));
         }
     }
 }

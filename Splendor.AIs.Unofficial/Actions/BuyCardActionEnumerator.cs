@@ -21,15 +21,11 @@ namespace Splendor.AIs.Unofficial.Actions
                 throw new ArgumentNullException(nameof(gameState));
             }
 
-            var cards = gameState.Tiers
-                .SelectMany(t => t.ColumnSlots.Values)
-                .Where(c => c != null)
-                .Concat(gameState.CurrentPlayer.ReservedCards);
-
-            foreach (var card in cards)
-            {
-                yield return BuyPermutations(card, gameState.CurrentPlayer);
-            }
+            return gameState.Tiers
+                  .SelectMany(t => t.ColumnSlots.Values)
+                  .Where(c => c != null)
+                  .Concat(gameState.CurrentPlayer.ReservedCards)
+                  .Select(c => BuyPermutations(c, gameState.CurrentPlayer));
         }
 
         private static IEnumerable<IAction> BuyPermutations(Card card,
